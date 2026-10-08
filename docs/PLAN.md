@@ -2,7 +2,7 @@
 
 Plan in zgodovina zahtev. Dokument je referenca za vse nadaljnje odločitve. Ko se zahteva spremeni, jo dopišemo v razdelek 9 (dnevnik sprememb), prejšnje različice ne brišemo.
 
-Stanje: **osnutek plana, čaka potrditev**. Koda še ni napisana.
+Stanje: **osnutek plana v2 (po povratni informaciji 8. 10. 2026), čaka potrditev**. Koda še ni napisana.
 
 ---
 
@@ -20,6 +20,12 @@ Stanje: **osnutek plana, čaka potrditev**. Koda še ni napisana.
 
 Druga navodila (8. 10. 2026): najprej podroben plan, vse informacije o zahtevah zabeležene za zgodovino odločitev.
 
+Povratna informacija na plan v1 (8. 10. 2026, dobesedno):
+
+> Ok 3CX in OUTLOOK staja težava ker ne smemo integrirati. In ne morem uvažati saj je zamudno.
+>
+> Ostalo bi šlo. Spet so omejitve z glasovnim snemanjem in obdelavo zakonsko
+
 ## 2. Zahteve, razčlenjene
 
 | ID | Zahteva | Prioriteta |
@@ -27,10 +33,11 @@ Druga navodila (8. 10. 2026): najprej podroben plan, vse informacije o zahtevah 
 | Z1 | Deluje v zaprtem službenem omrežju, brez nameščanja programov in brez poganjanja skript (PowerShell, Python, .exe ipd.) | obvezno |
 | Z2 | Enostavno za uporabo in vzdrževanje | obvezno |
 | Z3 | Del se lahko gosti na mojem cPanel strežniku | dovoljeno |
-| Z4 | Lokalna transkripcija sestankov (slovenščina), obdelava na mojem PC | obvezno |
-| Z5 | Povzetki sestankov, po možnosti z majhnim lokalnim modelom | obvezno (osnovno), AI povzetek zaželen |
-| Z6 | Sledenje emailom: kje še čakam odgovor, kaj je ostalo odprto | obvezno |
-| Z7 | 3CX: sledenje klicem (zgrešeni, za povratni klic), brez kompleksnosti | zaželeno |
+| Z4 | ~~Lokalna transkripcija sestankov (slovenščina)~~ **v2:** snemanje glasu in obdelava posnetkov sta zakonsko omejena; namesto tega hitri zapiski med sestankom (glej O3 v2) | spremenjeno |
+| Z5 | Povzetki sestankov, po možnosti z majhnim lokalnim modelom; **v2:** povzetek iz mojih zapiskov, ne iz posnetka | obvezno (osnovno), AI povzetek zaželen |
+| Z6 | Sledenje emailom: kje še čakam odgovor, kaj je ostalo odprto; **v2:** brez integracije in brez uvoza, samo zelo hiter ročni vnos | obvezno |
+| Z7 | ~~3CX: sledenje klicem~~ **v2:** brez integracije in uvoza; klici se beležijo enako kot emaili (hiter ročni vnos) | spremenjeno |
+| Z14 | **v2:** Vnos mora biti hitrejši od uvoza: ena vrstica, brez obrazcev | obvezno |
 | Z8 | Opravila / to-do v preglednem vmesniku | obvezno |
 | Z9 | Pregled priložnosti (prodajni pipeline) | obvezno |
 | Z10 | Pregled projektov | obvezno |
@@ -63,12 +70,20 @@ Brskalnik nalaga samo statične datoteke (HTML, JS, model). **Nobeni podatki, po
 **O1. Ena HTML aplikacija, brez namestitve.** Vanilla JavaScript, brez build koraka, brez odvisnosti razen knjižnice za AI. Vzdrževanje je odpiranje ene datoteke.
 
 **O2. Dva načina zagona.**
-- **A (priporočeno): gostovanje na cPanel** pod HTTPS (npr. `https://orodje.mojadomena.si`), zaščiteno z geslom (`.htaccess`). Razlogi: mikrofon in snemanje zaslona zahtevata HTTPS; brskalnik lahko modele (250 MB do 1 GB) shrani v predpomnilnik, kar iz lokalne datoteke ne gre; večnitni WASM zahteva posebne glave (COOP/COEP), ki jih nastavimo v `.htaccess`.
-- **B: lokalna datoteka** (`file://`, npr. z omrežnega diska). Opravila, priložnosti in sledenje delujejo v celoti. Transkripcija deluje, a model se nalaga vsakič znova. Rezervna možnost, če službeno omrežje blokira mojo domeno.
+- **A (priporočeno): gostovanje na cPanel** pod HTTPS (npr. `https://orodje.mojadomena.si`), zaščiteno z geslom (`.htaccess`). Razlogi: brskalnik lahko modele (250 MB do 1 GB) shrani v predpomnilnik, kar iz lokalne datoteke ne gre; večnitni WASM zahteva posebne glave (COOP/COEP), ki jih nastavimo v `.htaccess`.
+- **B: lokalna datoteka** (`file://`, npr. z omrežnega diska). Vse razen opcijskega AI povzetka (F4) deluje v celoti; model za AI bi se nalagal vsakič znova. **v2:** brez transkripcije je način B povsem enakovreden, cPanel je potreben samo za AI povzetek. Rezervna možnost, če službeno omrežje blokira mojo domeno.
 
 Odprto vprašanje V1: ali službeni požarni zid dovoli dostop do moje domene?
 
-**O3. Transkripcija: Whisper v brskalniku** prek knjižnice Transformers.js (Hugging Face, Apache 2.0, različica 4.2.0).
+**O3 v2 (velja). Brez snemanja glasu: hitri zapiski med sestankom.**
+Razlog: zakonske omejitve snemanja in obdelave glasu (povratna informacija 8. 10. 2026). Orodje ne dostopa do mikrofona in ne obdeluje zvočnih posnetkov.
+- Način "Sestanek": velik vnos, kjer med sestankom tipkam kratke vrstice. Vsaka vrstica dobi časovno oznako.
+- Bližnjice na začetku vrstice: `!` naloga (moja), `@Ime` naloga za drugo osebo, `?` odprto vprašanje, `=` dogovor/odločitev, `$` cena/vrednost, `>` naslednji korak z rokom (npr. `> ponudba pet`).
+- Ob koncu orodje samo sestavi zapisnik (udeleženci, dogovori, naloge, odprta vprašanja, naslednji koraki); moje naloge gredo z enim klikom med opravila, naloge drugih v "Čakam na".
+- Predloga zapisnika se kopira v email ali Word.
+- Opcija za kasneje, samo če jo podjetje izrecno dovoli: prilepiti prepis, ki ga ustvari že odobreno orodje (npr. Teams). Ne gradimo vnaprej.
+
+**O3 v1 (opuščeno 8. 10. 2026, zakonske omejitve). Transkripcija: Whisper v brskalniku** prek knjižnice Transformers.js (Hugging Face, Apache 2.0, različica 4.2.0).
 - Privzeti model `whisper-small` (multilingual, kvantiziran, okoli 250 MB): razumna slovenščina, deluje tudi brez grafične kartice.
 - Opcija `whisper-large-v3-turbo` (okoli 800 MB) za boljšo kakovost, če ima PC WebGPU.
 - Izbira modela v nastavitvah.
@@ -77,11 +92,19 @@ Odprto vprašanje V1: ali službeni požarni zid dovoli dostop do moje domene?
 - Posnetek si lahko shranim lokalno; aplikacija ga privzeto ne hrani.
 - Pričakovana hitrost (ocena, preveriti na službenem PC): z WebGPU nekaj minut za uro sestanka; samo CPU lahko 20 do 40 minut za uro. Diarizacija (kdo govori) v prvi različici ni vključena.
 
-**O4. Povzetki v dveh nivojih.**
+**O4 v2 (velja):** enaka dva nivoja, a vhod so moji zapiski namesto transkripta. Hitri povzetek iz bližnjic (`!`, `?`, `=`, `>`) je zanesljiv, ker strukturo določim sam med tipkanjem. Lokalni AI povzetek ostane opcija za lepšo besedilno obliko (F4, eksperimentalno).
+
+**O4 v1. Povzetki v dveh nivojih.**
 - **Hitri povzetek (vedno na voljo, brez AI):** pravila za slovenščino iz transkripta potegnejo dogovore, naloge, roke/datume, odprta vprašanja in ključne teme v predlogo zapisnika. Naloge se z enim klikom pretvorijo v opravila.
 - **AI povzetek (eksperimentalno, lokalno):** majhen jezikovni model (privzeto Qwen2.5 1.5B Instruct, okoli 1 GB, zahteva WebGPU). Dolg transkript se povzema po delih, nato skupaj. Opozorilo: majhni modeli so v slovenščini omejeni. Model je zamenljiv v nastavitvah.
 
-**O5. Sledenje emailom brez integracije v Outlook/Exchange.** Neposreden dostop do pošte bi zahteval skripte ali API dovoljenja (krši Z1). Zato:
+**O5 v2 (velja). Sledenje "Čakam na" z vnosom v eni vrstici.** Brez integracije, brez uvoza, brez prilepljanja emailov.
+- Globalna bližnjica (npr. `Ctrl+K` ali tipka `c`) odpre eno vrstico, kjer napišem npr. `Novak ponudba 3d` ali `klic Kovač servis jutri`.
+- Orodje prepozna vrsto (email privzeto, `klic` če je napisano), osebo/stranko (iz seznama strank, sicer prva beseda), rok (`3d`, `jutri`, `pet`, `15.10.`) in povezavo na priložnost/projekt, če stranka obstaja.
+- V pregledu "Danes" so zapadli na vrhu; en klik: "urejeno", "+2 dni" ali "pretvori v opravilo".
+- Ni gumbov `mailto:` in ne `tel:`, da ni nobene povezave z Outlookom ali 3CX.
+
+**O5 v1 (opuščeno 8. 10. 2026, ni dovoljeno integrirati, uvoz je zamuden). Sledenje emailom brez integracije v Outlook/Exchange.** Neposreden dostop do pošte bi zahteval skripte ali API dovoljenja (krši Z1). Zato:
 - seznam "Čakam odgovor": zadeva, oseba, datum poslano, opomni čez N dni, stanje;
 - hiter vnos: prilepi besedilo emaila ali povleci `.eml` datoteko, aplikacija prebere zadevo, pošiljatelja, datum;
 - gumb "Pošlji opomnik" odpre nov email (`mailto:`) z "Re: zadeva";
@@ -89,7 +112,9 @@ Odprto vprašanje V1: ali službeni požarni zid dovoli dostop do moje domene?
 
 Dopolnilo v README: nasvet za Outlookove zastavice (Follow up) in iskalno mapo, ki delujeta brez dodatkov.
 
-**O6. 3CX brez integracije.**
+**O6 v2 (velja): 3CX se v orodju ne pojavlja.** Klici se vodijo v istem seznamu "Čakam na" (O5 v2).
+
+**O6 v1 (opuščeno 8. 10. 2026). 3CX brez integracije.**
 - Telefonske številke v aplikaciji so povezave `tel:`; klik zažene klic v nameščeni 3CX aplikaciji.
 - Uvoz CSV zgodovine klicev (izvoz iz 3CX): samodejno prepoznavanje stolpcev, filter zgrešenih/neodgovorjenih, ustvarjanje vnosov "Povratni klic".
 - Hitri ročni zapis klica (kdo, kaj, naslednji korak).
@@ -139,7 +164,7 @@ Neposredno povezavo na zunanji API dodamo šele po odobritvi v podjetju (razdele
 | Tema | Kako je naslovljeno |
 |------|---------------------|
 | Minimizacija in lokalna obdelava (GDPR čl. 5, 25) | vsa obdelava na PC; strežnik dobi samo statične datoteke |
-| Snemanje sestankov | pred snemanjem opomnik: obvesti udeležence in pridobi soglasje; zapisan čas obvestila. Pravna podlaga je odvisna od internega pravilnika, preveriti s pooblaščencem za varstvo podatkov (DPO). Sodi tudi v ZVOP-2. |
+| Snemanje sestankov | **v2: ni snemanja, ne obdelave glasu.** (v1: pred snemanjem opomnik: obvesti udeležence in pridobi soglasje; zapisan čas obvestila. Pravna podlaga je odvisna od internega pravilnika, preveriti s pooblaščencem za varstvo podatkov (DPO). Sodi tudi v ZVOP-2.) |
 | Hramba | posnetek se privzeto ne hrani; transkript lahko izbrišem; opomnik za čiščenje starih sestankov (nastavljiv rok, npr. 90 dni) |
 | Pravica do izbrisa / vpogleda | iskanje po osebi, izvoz, izbris |
 | Varnost (čl. 32) | podatki na službenem PC v profilu brskalnika (BitLocker, prijava v domeno); cPanel pod HTTPS in z geslom; brez piškotkov, sledenja ali zunanje analitike |
@@ -168,11 +193,13 @@ Skripta za prenos modelov teče na domačem računalniku, v službi se nič ne p
 | Faza | Vsebina | Rezultat |
 |------|---------|----------|
 | F1 | Ogrodje, shranjevanje (IndexedDB), varnostne kopije, opravila, priložnosti, projekti, mape, iskanje, pregled Danes, hiter vnos | uporabno orodje za vsak dan |
-| F2 | Sledenje: emaili (ročno, prilepi, `.eml`), 3CX (`tel:`, CSV uvoz, zapis klica) | Z6, Z7 |
-| F3 | Sestanki: snemanje, nalaganje datotek, Whisper transkripcija, hitri povzetek, naloge v opravila | Z4, Z5 osnovno |
-| F4 | AI povzetek z lokalnim LLM (eksperimentalno) | Z5 polno |
-| F5 | Anonimizator in priprava za zunanji AI, GDPR funkcije (opomnik soglasja, čiščenje) | Z12, Z13 |
-| F6 | cPanel paket (`.htaccess`, skripta za modele), README | Z3 |
+| F2 | "Čakam na": vnos v eni vrstici za emaile in klice, opomniki v pregledu Danes | Z6, Z7, Z14 |
+| F3 | Sestanki: hitri zapiski z bližnjicami, samodejni zapisnik, naloge v opravila | Z4 v2, Z5 osnovno |
+| F4 | AI povzetek zapiskov z lokalnim LLM (eksperimentalno, opcijsko) | Z5 polno |
+| F5 | Anonimizator in priprava za zunanji AI, GDPR funkcije (čiščenje starih zapisov, izbris po osebi) | Z12, Z13 |
+| F6 | cPanel paket (`.htaccess`), README | Z3 |
+
+Faze v1 (zgodovina): F2 je vključeval `.eml` in 3CX CSV uvoz, F3 snemanje in Whisper transkripcijo. Opuščeno 8. 10. 2026.
 
 Po F1 in F3 je smiselno preizkusiti na službenem PC in plan po potrebi popraviti.
 
@@ -181,13 +208,13 @@ Po F1 in F3 je smiselno preizkusiti na službenem PC in plan po potrebi popravit
 | ID | Vprašanje / tveganje | Vpliv | Ukrep |
 |----|----------------------|-------|-------|
 | V1 | Ali službeno omrežje dovoli dostop do moje cPanel domene? | brez tega samo način B | preizkus; rezerva lokalna datoteka |
-| V2 | Ali 3CX dovoli izvoz CSV zgodovine klicev? | brez tega samo `tel:` in ročni zapis | preveriti v 3CX |
+| V2 | ~~Ali 3CX dovoli izvoz CSV?~~ | zaprto 8. 10. 2026: 3CX se ne integrira | |
 | V3 | Ima službeni PC WebGPU (grafična kartica, posodobljen Edge/Chrome)? | hitrost transkripcije, AI povzetek | test stran v aplikaciji pokaže zmogljivosti |
-| V4 | Ali IT politika blokira mikrofon/deljenje zaslona v brskalniku? | snemanje; rezerva je nalaganje posnetka iz Teams | preizkus |
-| V5 | Kakovost slovenske transkripcije z `whisper-small` | uporabnost | preklop na `large-v3-turbo` |
+| V4 | ~~Mikrofon/deljenje zaslona?~~ | zaprto 8. 10. 2026: brez snemanja | |
+| V5 | ~~Kakovost transkripcije~~ | zaprto 8. 10. 2026: brez transkripcije | |
 | V6 | Kakovost slovenskih povzetkov z majhnim LLM | uporabnost | hitri povzetek brez AI kot osnova; kasneje zunanji AI z anonimizacijo |
-| V7 | Interni pravilnik o snemanju sestankov | pravna podlaga | DPO |
-| V8 | Kateri Microsoft 365 je v podjetju (Teams ima morda že lastno transkripcijo)? | morda podvajanje | preveriti, uvoz Teams transkripta (.vtt/.docx) kot dodatna možnost |
+| V7 | Ali je dovoljeno v zapiske vpisovati osebne podatke udeležencev (imena, kontakte)? Verjetno da, kot običajni poslovni zapisnik | pravna podlaga | potrditi z DPO |
+| V8 | Ali podjetje uradno dovoljuje transkripcijo v Teams? | samo za morebitno kasnejšo opcijo (O3 v2) | ni nujno |
 | V9 | Ali uporabljam Edge ali Chrome? | File System Access API deluje v obeh, v Firefoxu ne | priporočilo Edge/Chrome |
 
 ## 9. Dnevnik sprememb zahtev in odločitev
@@ -196,3 +223,4 @@ Po F1 in F3 je smiselno preizkusiti na službenem PC in plan po potrebi popravit
 |-------|-----------|
 | 2026-10-08 | Prva zahteva (razdelek 1). Odločitev za brskalniško aplikacijo, lokalni Whisper, cPanel samo za statične datoteke. |
 | 2026-10-08 | Zahteva: najprej podroben plan, zgodovina zahtev v dokumentu. Implementacija ustavljena do potrditve plana. |
+| 2026-10-08 | Povratna informacija na v1: integracija Outlook in 3CX ni dovoljena, uvoz je prezamuden, snemanje in obdelava glasu sta zakonsko omejena. Odločitve v2: brez snemanja in transkripcije (O3 v2: hitri zapiski z bližnjicami), sledenje emailom in klicem z vnosom v eni vrstici (O5 v2), 3CX izpuščen (O6 v2), nova zahteva Z14 (hitrost vnosa). Ostalo (O1, O2, O7 do O10) potrjeno. |
