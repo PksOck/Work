@@ -2,7 +2,7 @@
 
 Plan in zgodovina zahtev. Dokument je referenca za vse nadaljnje odločitve. Ko se zahteva spremeni, jo dopišemo v razdelek 9 (dnevnik sprememb), prejšnje različice ne brišemo.
 
-Stanje: **osnutek plana v2 (po povratni informaciji 8. 10. 2026), čaka potrditev**. Koda še ni napisana.
+Stanje: **plan v2 potrjen za prvi korak. V izdelavi: samo kanban to-do stran (`orodje/index.html`).** Ostale faze sledijo po preizkusu.
 
 ---
 
@@ -25,6 +25,16 @@ Povratna informacija na plan v1 (8. 10. 2026, dobesedno):
 > Ok 3CX in OUTLOOK staja težava ker ne smemo integrirati. In ne morem uvažati saj je zamudno.
 >
 > Ostalo bi šlo. Spet so omejitve z glasovnim snemanjem in obdelavo zakonsko
+
+Navodilo za prvi korak (8. 10. 2026, dobesedno):
+
+> Naredi samo web page z too doo.
+>
+> Imamo WEBGPU in lahko dostopam do Cpanel domene.
+>
+> Potem gremo naprej.
+>
+> Običajo je to kanban, nekaj so potem znotraj tega posamezne priložnosti sledenje
 
 ## 2. Zahteve, razčlenjene
 
@@ -173,6 +183,14 @@ Neposredno povezavo na zunanji API dodamo šele po odobritvi v podjetju (razdele
 
 Pomembno: preden orodje uporabim za sestanke s strankami, naj pregled opravi DPO ali IT varnost v podjetju. Plan ni pravni nasvet.
 
+**O11 (8. 10. 2026). Prvi korak je samo kanban to-do stran.**
+- Ena tabla (kanban) s stolpci: Za narediti, V delu, Čakam, Narejeno.
+- Vsaka kartica ima vrsto: **Opravilo**, **Priložnost** ali **Sledenje** (čakam na odgovor/klic). Priložnosti in sledenja torej živijo kot kartice na isti tabli, ne v ločenih modulih. To nadomesti ločene poglede iz O8 za prvi korak.
+- Znotraj kartice: stranka, rok, prioriteta, vrednost (priložnost), pot do mape, opombe, podnaloge, **dnevnik sledenja** (zapisi s časom: kaj se je zgodilo, naslednji korak).
+- Hiter vnos v eni vrstici (Z14), npr. `Novak ponudba jutri !1 #p 5000€ @Novak d.o.o.`.
+- Shranjevanje v brskalniku + samodejna varnostna kopija v datoteko + izvoz/uvoz JSON.
+- Gostovanje na cPanel ali odpiranje kot lokalna datoteka.
+
 ## 6. Struktura repozitorija
 
 ```
@@ -206,9 +224,9 @@ Po F1 in F3 je smiselno preizkusiti na službenem PC in plan po potrebi popravit
 
 | ID | Vprašanje / tveganje | Vpliv | Ukrep |
 |----|----------------------|-------|-------|
-| V1 | Ali službeno omrežje dovoli dostop do moje cPanel domene? | brez tega samo način B | preizkus; rezerva lokalna datoteka |
+| V1 | ~~Dostop do cPanel domene?~~ | zaprto 8. 10. 2026: **da**, način A (cPanel) je izvedljiv | |
 | V2 | ~~Ali 3CX dovoli izvoz CSV?~~ | zaprto 8. 10. 2026: 3CX se ne integrira | |
-| V3 | Ima službeni PC WebGPU (grafična kartica, posodobljen Edge/Chrome)? | hitrost transkripcije, AI povzetek | test stran v aplikaciji pokaže zmogljivosti |
+| V3 | ~~WebGPU?~~ | zaprto 8. 10. 2026: **da**, lokalni AI povzetek (F4) je izvedljiv | |
 | V4 | ~~Mikrofon/deljenje zaslona?~~ | zaprto 8. 10. 2026: brez snemanja | |
 | V5 | ~~Kakovost transkripcije~~ | zaprto 8. 10. 2026: brez transkripcije | |
 | V6 | Kakovost slovenskih povzetkov z majhnim LLM | uporabnost | hitri povzetek brez AI kot osnova; kasneje zunanji AI z anonimizacijo |
@@ -223,3 +241,4 @@ Po F1 in F3 je smiselno preizkusiti na službenem PC in plan po potrebi popravit
 | 2026-10-08 | Prva zahteva (razdelek 1). Odločitev za brskalniško aplikacijo, lokalni Whisper, cPanel samo za statične datoteke. |
 | 2026-10-08 | Zahteva: najprej podroben plan, zgodovina zahtev v dokumentu. Implementacija ustavljena do potrditve plana. |
 | 2026-10-08 | Povratna informacija na v1: integracija Outlook in 3CX ni dovoljena, uvoz je prezamuden, snemanje in obdelava glasu sta zakonsko omejena. Odločitve v2: brez snemanja in transkripcije (O3 v2: hitri zapiski z bližnjicami), sledenje emailom in klicem z vnosom v eni vrstici (O5 v2), 3CX izpuščen (O6 v2), nova zahteva Z14 (hitrost vnosa). Ostalo (O1, O2, O7 do O10) potrjeno. |
+| 2026-10-08 | Potrjeno: WebGPU je na voljo, cPanel domena dostopna (V1, V3 zaprta). Prvi korak omejen na kanban to-do stran, kjer so priložnosti in sledenja kartice znotraj iste table (O11). |

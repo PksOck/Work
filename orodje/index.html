@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Delovni pult</title>
+<style>
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #eceef2;
+  --border: #d9dde3;
+  --text: #1d2330;
+  --muted: #646d7c;
+  --accent: #2f6fde;
+  --accent-text: #ffffff;
+  --danger: #c93636;
+  --warn: #b7700a;
+  --ok: #23854a;
+  --task: #5b6577;
+  --opp: #1f7a6d;
+  --follow: #8a4fc4;
+  --shadow: 0 1px 2px rgba(20, 30, 50, .08), 0 2px 8px rgba(20, 30, 50, .06);
+  --radius: 8px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171c; --surface: #1d2128; --surface-2: #262b34; --border: #333a45;
+    --text: #e6e9ee; --muted: #9aa3b2; --accent: #5b93f5; --accent-text: #0d1117;
+    --danger: #ef6b6b; --warn: #e5a443; --ok: #4cc27c;
+    --task: #9aa3b2; --opp: #45c0ad; --follow: #b98cf0;
+    --shadow: 0 1px 2px rgba(0,0,0,.4); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171c; --surface: #1d2128; --surface-2: #262b34; --border: #333a45;
+  --text: #e6e9ee; --muted: #9aa3b2; --accent: #5b93f5; --accent-text: #0d1117;
+  --danger: #ef6b6b; --warn: #e5a443; --ok: #4cc27c;
+  --task: #9aa3b2; --opp: #45c0ad; --follow: #b98cf0;
+  --shadow: 0 1px 2px rgba(0,0,0,.4); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.4 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  display: flex; flex-direction: column;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.hidden { display: none !important; }
+
+/* Glava */
+header {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
+}
+header h1 { font-size: 16px; margin: 0 8px 0 0; white-space: nowrap; }
+.quick { flex: 1 1 380px; display: flex; gap: 6px; min-width: 0; }
+.quick input { flex: 1; min-width: 0; }
+input[type=text], input[type=search], input[type=date], input[type=number], select, textarea {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px;
+}
+input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 6px; padding: 6px 10px; white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn.danger { color: var(--danger); }
+.btn.small { padding: 2px 8px; font-size: 12px; }
+.icon-btn { border: 0; background: transparent; padding: 4px 6px; border-radius: 6px; color: var(--muted); }
+.icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+.toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.toolbar input[type=search] { width: 220px; max-width: 100%; }
+.chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 3px 10px; font-size: 13px;
+}
+.chip[aria-pressed=true] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.stats { margin-left: auto; display: flex; gap: 14px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
+.stats b { color: var(--text); }
+.stats .bad b { color: var(--danger); }
+.saveinfo { font-size: 12px; color: var(--muted); }
+.saveinfo.warn { color: var(--warn); }
+a { color: var(--accent); }
+
+/* Tabla */
+main { flex: 1; overflow: auto; padding: 12px 16px 24px; }
+.board { display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr)); gap: 12px; align-items: start; min-height: 100%; }
+.col { background: var(--surface-2); border-radius: var(--radius); display: flex; flex-direction: column; min-height: 200px; }
+.col-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; font-weight: 600; }
+.col-head .count { color: var(--muted); font-weight: 400; font-size: 12px; }
+.col-list { padding: 4px 8px 10px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; flex: 1; }
+.col.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.placeholder { height: 4px; background: var(--accent); border-radius: 2px; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--task);
+  border-radius: var(--radius); padding: 8px 10px; box-shadow: var(--shadow); cursor: grab; position: relative;
+}
+.card:hover { border-color: var(--accent); border-left-color: inherit; }
+.card.t-opp { border-left-color: var(--opp); }
+.card.t-follow { border-left-color: var(--follow); }
+.card.t-task { border-left-color: var(--task); }
+.card.dragging { opacity: .4; }
+.card.done .title { text-decoration: line-through; color: var(--muted); }
+.card .top { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--muted); margin-bottom: 2px; flex-wrap: wrap; }
+.badge { font-size: 11px; padding: 0 6px; border-radius: 4px; border: 1px solid currentColor; line-height: 16px; }
+.badge.task { color: var(--task); }
+.badge.opp { color: var(--opp); }
+.badge.follow { color: var(--follow); }
+.prio { font-weight: 700; }
+.prio.p1 { color: var(--danger); }
+.prio.p2 { color: var(--warn); }
+.card .title { font-weight: 600; word-break: break-word; }
+.card .client { color: var(--muted); font-size: 12px; }
+.card .next { font-size: 12px; margin-top: 4px; }
+.card .meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.due.over { color: var(--danger); font-weight: 600; }
+.due.today { color: var(--warn); font-weight: 600; }
+.card .lastlog { font-size: 12px; color: var(--muted); margin-top: 4px; border-top: 1px dashed var(--border); padding-top: 4px; }
+.empty { color: var(--muted); font-size: 12px; text-align: center; padding: 10px 0; }
+
+/* Predal z detajli */
+.backdrop { position: fixed; inset: 0; background: rgba(10, 15, 25, .35); z-index: 20; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(520px, 100%); background: var(--surface);
+  border-left: 1px solid var(--border); z-index: 21; display: flex; flex-direction: column; box-shadow: -4px 0 20px rgba(0,0,0,.15);
+}
+.drawer-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.drawer-head input { flex: 1; font-size: 16px; font-weight: 600; border-color: transparent; }
+.drawer-head input:hover { border-color: var(--border); }
+.drawer-body { flex: 1; overflow: auto; padding: 12px 16px 20px; }
+.drawer-foot { display: flex; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+.field label { font-size: 12px; color: var(--muted); }
+.field textarea { min-height: 80px; resize: vertical; }
+.row { display: flex; gap: 6px; align-items: center; }
+.row > input { flex: 1; min-width: 0; }
+h3 { font-size: 13px; margin: 16px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.subtasks, .log { list-style: none; margin: 0; padding: 0; }
+.subtasks li { display: flex; gap: 6px; align-items: center; padding: 2px 0; }
+.subtasks li span { flex: 1; word-break: break-word; }
+.subtasks li.done span { text-decoration: line-through; color: var(--muted); }
+.log li { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; }
+.log li .when { color: var(--muted); font-size: 12px; white-space: nowrap; min-width: 92px; }
+.log li .txt { flex: 1; white-space: pre-wrap; word-break: break-word; }
+.typesel { display: flex; gap: 4px; }
+
+/* Modal */
+.modal {
+  position: fixed; left: 50%; top: 8vh; transform: translateX(-50%); width: min(640px, calc(100% - 32px));
+  max-height: 84vh; overflow: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  z-index: 31; padding: 16px 20px; box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+.modal h2 { margin: 0 0 10px; font-size: 17px; }
+.modal table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.modal td, .modal th { border-bottom: 1px solid var(--border); padding: 5px 6px; text-align: left; vertical-align: top; }
+.modal code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+.modal-backdrop { z-index: 30; }
+.menu { display: flex; flex-direction: column; gap: 6px; }
+.menu .btn { text-align: left; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: var(--bg);
+  padding: 8px 14px; border-radius: 8px; z-index: 40; display: flex; gap: 12px; align-items: center; box-shadow: var(--shadow);
+}
+.toast button { background: transparent; border: 0; color: var(--bg); text-decoration: underline; font-weight: 600; }
+
+@media (max-width: 1000px) { .board { grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
+@media (max-width: 600px) {
+  header, .toolbar, main { padding-left: 16px; padding-right: 16px; }
+  .board { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+  .stats { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Delovni pult</h1>
+  <form class="quick" id="quickForm" autocomplete="off">
+    <input type="text" id="quickInput" placeholder="Hiter vnos: Novak ponudba jutri !1 #p 5000€ @Novak   (tipka N)" aria-label="Hiter vnos">
+    <button class="btn primary" type="submit">Dodaj</button>
+  </form>
+  <span class="saveinfo" id="saveInfo"></span>
+  <button class="btn" id="menuBtn" aria-label="Meni">☰ Meni</button>
+</header>
+
+<div class="toolbar">
+  <input type="search" id="search" placeholder="Iskanje (tipka /)" aria-label="Iskanje">
+  <div class="chips" id="typeChips" role="group" aria-label="Vrsta">
+    <button class="chip" data-type="all" aria-pressed="true">Vse</button>
+    <button class="chip" data-type="task" aria-pressed="false">Opravila</button>
+    <button class="chip" data-type="opp" aria-pressed="false">Priložnosti</button>
+    <button class="chip" data-type="follow" aria-pressed="false">Sledenja</button>
+  </div>
+  <select id="clientFilter" aria-label="Stranka"><option value="">Vse stranke</option></select>
+  <label style="font-size:13px;display:flex;gap:4px;align-items:center"><input type="checkbox" id="dueOnly"> samo zapadlo/danes</label>
+  <div class="stats" id="stats"></div>
+</div>
+
+<main>
+  <div class="board" id="board"></div>
+</main>
+
+<datalist id="clientList"></datalist>
+
+<div id="drawerWrap" class="hidden">
+  <div class="backdrop" data-close="drawer"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Kartica">
+    <div class="drawer-head">
+      <input type="text" id="dTitle" aria-label="Naslov">
+      <button class="icon-btn" data-close="drawer" aria-label="Zapri">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="field">
+        <label>Vrsta</label>
+        <div class="typesel chips" id="dType">
+          <button class="chip" data-type="task" aria-pressed="false">Opravilo</button>
+          <button class="chip" data-type="opp" aria-pressed="false">Priložnost</button>
+          <button class="chip" data-type="follow" aria-pressed="false">Sledenje (čakam na)</button>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="dCol">Stolpec</label><select id="dCol"></select></div>
+        <div class="field"><label for="dClient">Stranka / oseba</label><input type="text" id="dClient" list="clientList"></div>
+        <div class="field"><label for="dDue">Rok</label><input type="date" id="dDue"></div>
+        <div class="field"><label for="dPrio">Prioriteta</label>
+          <select id="dPrio"><option value="0">brez</option><option value="1">1 visoka</option><option value="2">2 srednja</option><option value="3">3 nizka</option></select>
+        </div>
+      </div>
+      <div class="grid2" id="oppFields">
+        <div class="field"><label for="dStage">Faza priložnosti</label><select id="dStage"></select></div>
+        <div class="field"><label for="dValue">Vrednost (EUR)</label><input type="number" id="dValue" min="0" step="100"></div>
+      </div>
+      <div class="field"><label for="dNext">Naslednji korak</label><input type="text" id="dNext" placeholder="npr. pokliči za odziv na ponudbo"></div>
+      <div class="field">
+        <label for="dPath">Mapa / datoteka na omrežnem disku</label>
+        <div class="row"><input type="text" id="dPath" placeholder="\\strežnik\projekti\Novak"><button class="btn small" id="copyPath" type="button">Kopiraj</button></div>
+      </div>
+      <div class="field"><label for="dNotes">Opombe</label><textarea id="dNotes"></textarea></div>
+
+      <h3>Podnaloge</h3>
+      <ul class="subtasks" id="dSubtasks"></ul>
+      <form class="row" id="subForm" autocomplete="off"><input type="text" id="subInput" placeholder="Nova podnaloga + Enter"></form>
+
+      <h3>Sledenje (dnevnik)</h3>
+      <form class="row" id="logForm" autocomplete="off"><input type="text" id="logInput" placeholder="Kaj se je zgodilo? npr. poslal ponudbo, klical, brez odziva + Enter"></form>
+      <ul class="log" id="dLog"></ul>
+      <p class="saveinfo" id="dMeta"></p>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn" id="dDone">✓ Narejeno</button>
+      <button class="btn" id="dPlus2">Rok +2 dni</button>
+      <button class="btn" id="dArchive">Arhiviraj</button>
+      <span style="flex:1"></span>
+      <button class="btn danger" id="dDelete">Izbriši</button>
+    </div>
+  </aside>
+</div>
+
+<div id="modalWrap" class="hidden">
+  <div class="backdrop modal-backdrop" data-close="modal"></div>
+  <div class="modal" role="dialog" aria-modal="true" id="modal"></div>
+</div>
+
+<input type="file" id="importFile" accept=".json,application/json" class="hidden">
+
+<script>
+'use strict';
+
+/* ---------- Konstante ---------- */
+const STORE_KEY = 'delovni-pult.v1';
+const COLS = [
+  { id: 'todo', name: 'Za narediti' },
+  { id: 'doing', name: 'V delu' },
+  { id: 'wait', name: 'Čakam' },
+  { id: 'done', name: 'Narejeno' },
+];
+const TYPES = { task: 'Opravilo', opp: 'Priložnost', follow: 'Sledenje' };
+const STAGES = ['Lead', 'Kvalifikacija', 'Ponudba', 'Pogajanja', 'Dobljeno', 'Izgubljeno'];
+const DAYS = ['ned', 'pon', 'tor', 'sre', 'čet', 'pet', 'sob'];
+
+/* ---------- Pomožne ---------- */
+const $ = (sel, el = document) => el.querySelector(sel);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = n => String(n).padStart(2, '0');
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const parseIso = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const eur = n => new Intl.NumberFormat('sl-SI', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0);
+const fmtTs = ts => { const d = new Date(ts); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+function dueInfo(due) {
+  if (!due) return null;
+  const diff = Math.round((parseIso(due) - today()) / 86400000);
+  const d = parseIso(due);
+  let label;
+  if (diff === 0) label = 'danes';
+  else if (diff === 1) label = 'jutri';
+  else if (diff === -1) label = 'včeraj';
+  else if (diff > 1 && diff < 7) label = `${DAYS[d.getDay()]} ${d.getDate()}.${d.getMonth() + 1}.`;
+  else label = `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear() !== today().getFullYear() ? d.getFullYear() : ''}`;
+  return { diff, label, cls: diff < 0 ? 'over' : diff === 0 ? 'today' : '' };
+}
+
+/* ---------- Stanje in shranjevanje ---------- */
+let state = { version: 1, cards: [] };
+let filters = { type: 'all', q: '', client: '', dueOnly: false };
+let openId = null;
+let lastDeleted = null;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch (e) { console.error(e); toast('Lokalnih podatkov ni bilo mogoče prebrati.'); }
+  if (!Array.isArray(state.cards)) state.cards = [];
+  state.cards.forEach(normalizeCard);
+}
+
+function normalizeCard(c) {
+  c.id ||= uid(); c.title ||= ''; c.type ||= 'task'; c.col ||= 'todo';
+  c.subtasks ||= []; c.log ||= []; c.order ??= Date.now();
+  c.created ||= Date.now(); c.updated ||= c.created;
+  return c;
+}
+
+let saveTimer = null;
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    setSaveInfo();
+  } catch (e) {
+    console.error(e);
+    toast('Shranjevanje v brskalnik ni uspelo. Izvozi podatke (Meni → Izvozi).');
+  }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(backupWrite, 2000);
+}
+
+function touch(c) { c.updated = Date.now(); save(); render(); }
+
+/* ---------- Varnostna kopija v datoteko (File System Access API) ---------- */
+let backupHandle = null;
+let backupOk = false;
+let lastBackup = null;
+
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('delovni-pult', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbGet(k) {
+  const db = await idb();
+  return new Promise((res, rej) => { const t = db.transaction('kv').objectStore('kv').get(k); t.onsuccess = () => res(t.result); t.onerror = () => rej(t.error); });
+}
+async function idbSet(k, v) {
+  const db = await idb();
+  return new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); });
+}
+
+const fsSupported = 'showSaveFilePicker' in window;
+
+async function initBackup() {
+  if (!fsSupported) return setSaveInfo();
+  try {
+    backupHandle = await idbGet('backupHandle') || null;
+    if (backupHandle) backupOk = (await backupHandle.queryPermission({ mode: 'readwrite' })) === 'granted';
+  } catch (e) { console.warn(e); }
+  setSaveInfo();
+}
+
+async function chooseBackup() {
+  try {
+    backupHandle = await window.showSaveFilePicker({
+      suggestedName: 'delovni-pult-kopija.json',
+      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+    });
+    await idbSet('backupHandle', backupHandle);
+    backupOk = true;
+    await backupWrite();
+    toast('Varnostna kopija nastavljena: ' + backupHandle.name);
+  } catch (e) { if (e.name !== 'AbortError') toast('Kopije ni bilo mogoče nastaviti: ' + e.message); }
+  closeModal();
+}
+
+async function reconnectBackup() {
+  if (!backupHandle) return;
+  try {
+    backupOk = (await backupHandle.requestPermission({ mode: 'readwrite' })) === 'granted';
+    if (backupOk) await backupWrite();
+  } catch (e) { toast('Dostop zavrnjen: ' + e.message); }
+  setSaveInfo();
+}
+
+async function backupWrite() {
+  if (!backupHandle || !backupOk) return;
+  try {
+    const w = await backupHandle.createWritable();
+    await w.write(JSON.stringify({ ...state, exported: new Date().toISOString() }, null, 1));
+    await w.close();
+    lastBackup = new Date();
+  } catch (e) {
+    console.warn(e);
+    backupOk = false;
+  }
+  setSaveInfo();
+}
+
+async function restoreFromBackup() {
+  if (!backupHandle) return;
+  try {
+    if (!backupOk) await reconnectBackup();
+    const f = await backupHandle.getFile();
+    importData(JSON.parse(await f.text()));
+  } catch (e) { toast('Branje kopije ni uspelo: ' + e.message); }
+}
+
+function setSaveInfo() {
+  const el = $('#saveInfo');
+  el.className = 'saveinfo';
+  if (!fsSupported) { el.textContent = 'Shranjeno v brskalniku'; return; }
+  if (!backupHandle) { el.innerHTML = 'Shranjeno v brskalniku · <a href="#" id="setBackupLink">nastavi kopijo</a>'; el.classList.add('warn'); return; }
+  if (!backupOk) { el.innerHTML = `Kopija <b>${esc(backupHandle.name)}</b> čaka dovoljenje · <a href="#" id="reconnectLink">potrdi</a>`; el.classList.add('warn'); return; }
+  el.textContent = `Kopija: ${backupHandle.name}` + (lastBackup ? ` · ${pad(lastBackup.getHours())}:${pad(lastBackup.getMinutes())}` : '');
+}
+
+/* ---------- Izvoz / uvoz ---------- */
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function exportJson() {
+  download(`delovni-pult-${isoDate(new Date())}.json`, JSON.stringify(state, null, 1), 'application/json');
+}
+function exportCsv() {
+  const head = ['Naslov', 'Vrsta', 'Stolpec', 'Stranka', 'Rok', 'Prioriteta', 'Faza', 'Vrednost', 'Naslednji korak', 'Mapa', 'Opombe', 'Zadnji zapis', 'Arhivirano'];
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const rows = state.cards.map(c => [c.title, TYPES[c.type], COLS.find(x => x.id === c.col)?.name, c.client, c.due, c.prio || '', c.type === 'opp' ? c.stage : '', c.value || '', c.next, c.path, c.notes, c.log[0]?.text, c.archived ? 'da' : ''].map(q).join(';'));
+  download(`delovni-pult-${isoDate(new Date())}.csv`, '\ufeff' + [head.map(q).join(';'), ...rows].join('\r\n'), 'text/csv');
+}
+function importData(data) {
+  if (!data || !Array.isArray(data.cards)) return toast('Datoteka ni veljavna kopija Delovnega pulta.');
+  if (!confirm(`Uvozim ${data.cards.length} kartic? Trenutni podatki (${state.cards.length} kartic) bodo zamenjani.`)) return;
+  state = { version: 1, cards: data.cards.map(normalizeCard) };
+  save(); render(); closeModal();
+  toast('Uvoz končan.');
+}
+
+/* ---------- Hiter vnos ---------- */
+function parseQuick(text) {
+  const card = { type: 'task', col: 'todo', prio: 0 };
+  const words = [];
+  const t0 = today();
+  const DAYMAP = { pon: 1, ponedeljek: 1, tor: 2, torek: 2, sre: 3, sreda: 3, sredo: 3, cet: 4, cetrtek: 4,
+    pet: 5, petek: 5, sob: 6, sobota: 6, soboto: 6, ned: 0, nedelja: 0, nedeljo: 0 };
+  for (const raw of text.trim().split(/\s+/)) {
+    const w = norm(raw);
+    let m;
+    if ((m = raw.match(/^!([123])$/))) { card.prio = +m[1]; continue; }
+    if (/^#(p|prilo\w*|opp)$/.test(w)) { card.type = 'opp'; card.stage = 'Lead'; continue; }
+    if (/^#(s|sled\w*|cakam|caka\w*)$/.test(w)) { card.type = 'follow'; card.col = 'wait'; continue; }
+    if (/^#(o|opr\w*)$/.test(w)) { card.type = 'task'; continue; }
+    if (/^#(v|vdelu)$/.test(w)) { card.col = 'doing'; continue; }
+    if (raw.startsWith('@') && raw.length > 1) { card.client = raw.slice(1).replace(/_/g, ' '); continue; }
+    if ((m = raw.match(/^€?(\d+(?:[.,]\d+)?)(k)?€$|^€(\d+(?:[.,]\d+)?)(k)?$/i))) {
+      const num = parseFloat((m[1] || m[3]).replace(',', '.')) * ((m[2] || m[4]) ? 1000 : 1);
+      card.value = Math.round(num); if (card.type === 'task') { card.type = 'opp'; card.stage = 'Lead'; }
+      continue;
+    }
+    if (w === 'danes') { card.due = isoDate(t0); continue; }
+    if (w === 'jutri') { card.due = isoDate(addDays(t0, 1)); continue; }
+    if (w === 'pojutrisnjem' || w === 'pojutri') { card.due = isoDate(addDays(t0, 2)); continue; }
+    if ((m = w.match(/^\+?(\d{1,3})(d|t)$/))) { card.due = isoDate(addDays(t0, +m[1] * (m[2] === 't' ? 7 : 1))); continue; }
+    if ((m = w.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})?$/))) {
+      const y = m[3] ? +m[3] : t0.getFullYear();
+      let d = new Date(y, +m[2] - 1, +m[1]);
+      if (!m[3] && d < t0) d = new Date(y + 1, +m[2] - 1, +m[1]);
+      if (!isNaN(d)) { card.due = isoDate(d); continue; }
+    }
+    if (Object.hasOwn(DAYMAP, w)) {
+      let diff = (DAYMAP[w] - t0.getDay() + 7) % 7; if (diff === 0) diff = 7;
+      card.due = isoDate(addDays(t0, diff)); continue;
+    }
+    words.push(raw);
+  }
+  card.title = words.join(' ');
+  if (!card.client) {
+    const known = clients();
+    const hit = known.find(k => norm(card.title).split(/\s+/).includes(norm(k)) || norm(card.title).startsWith(norm(k) + ' '));
+    if (hit) card.client = hit;
+  }
+  return card;
+}
+
+function addCard(partial) {
+  const c = normalizeCard({ ...partial, id: uid(), order: -Date.now() });
+  if (c.col === 'done') c.doneAt = Date.now();
+  state.cards.push(c);
+  save(); render();
+  return c;
+}
+
+/* ---------- Izris table ---------- */
+function clients() {
+  const set = new Map();
+  state.cards.forEach(c => { if (c.client && !set.has(norm(c.client))) set.set(norm(c.client), c.client.trim()); });
+  return [...set.values()].sort((a, b) => a.localeCompare(b, 'sl'));
+}
+
+function matches(c) {
+  if (c.archived) return false;
+  if (filters.type !== 'all' && c.type !== filters.type) return false;
+  if (filters.client && norm(c.client) !== norm(filters.client)) return false;
+  if (filters.dueOnly) { const d = dueInfo(c.due); if (!d || d.diff > 0 || c.col === 'done') return false; }
+  if (filters.q) {
+    const hay = norm([c.title, c.client, c.notes, c.next, c.path, c.stage, ...c.subtasks.map(s => s.text), ...c.log.map(l => l.text)].join(' '));
+    if (!norm(filters.q).split(/\s+/).every(t => hay.includes(t))) return false;
+  }
+  return true;
+}
+
+function cardHtml(c) {
+  const d = dueInfo(c.due);
+  const subDone = c.subtasks.filter(s => s.done).length;
+  const last = c.log[0];
+  return `<article class="card t-${c.type}${c.col === 'done' ? ' done' : ''}" draggable="true" data-id="${c.id}" tabindex="0">
+    <div class="top">
+      <span class="badge ${c.type}">${TYPES[c.type]}${c.type === 'opp' && c.stage ? ' · ' + esc(c.stage) : ''}</span>
+      ${c.prio ? `<span class="prio p${c.prio}">!${c.prio}</span>` : ''}
+    </div>
+    <div class="title">${esc(c.title) || '<i>(brez naslova)</i>'}</div>
+    ${c.client ? `<div class="client">${esc(c.client)}</div>` : ''}
+    ${c.next ? `<div class="next">→ ${esc(c.next)}</div>` : ''}
+    <div class="meta">
+      ${d ? `<span class="due ${c.col === 'done' ? '' : d.cls}">📅 ${d.label}</span>` : ''}
+      ${c.type === 'opp' && c.value ? `<span>${eur(c.value)}</span>` : ''}
+      ${c.subtasks.length ? `<span>☑ ${subDone}/${c.subtasks.length}</span>` : ''}
+      ${c.path ? `<span title="${esc(c.path)}">📁</span>` : ''}
+      ${c.log.length ? `<span>🗒 ${c.log.length}</span>` : ''}
+    </div>
+    ${last ? `<div class="lastlog">${fmtTs(last.ts)} · ${esc(last.text)}</div>` : ''}
+  </article>`;
+}
+
+function sortCards(list, colId) {
+  if (colId === 'done') return list.sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  return list.sort((a, b) => a.order - b.order);
+}
+
+function render() {
+  const board = $('#board');
+  const visible = state.cards.filter(matches);
+  board.innerHTML = COLS.map(col => {
+    const list = sortCards(visible.filter(c => c.col === col.id), col.id);
+    const shown = col.id === 'done' ? list.slice(0, 50) : list;
+    return `<section class="col" data-col="${col.id}">
+      <div class="col-head"><span>${col.name} <span class="count">${list.length}</span></span>
+        ${col.id === 'done' && list.length ? '<button class="icon-btn" data-action="archiveDone" title="Arhiviraj vse narejeno">Arhiviraj vse</button>' : ''}
+      </div>
+      <div class="col-list" data-col="${col.id}">${shown.map(cardHtml).join('') || '<div class="empty">Prazno</div>'}</div>
+    </section>`;
+  }).join('');
+  renderStats();
+  renderClients();
+}
+
+function renderStats() {
+  const live = state.cards.filter(c => !c.archived && c.col !== 'done');
+  let over = 0, todayN = 0;
+  live.forEach(c => { const d = dueInfo(c.due); if (d) { if (d.diff < 0) over++; else if (d.diff === 0) todayN++; } });
+  const opps = live.filter(c => c.type === 'opp' && c.stage !== 'Izgubljeno' && c.stage !== 'Dobljeno');
+  const sum = opps.reduce((s, c) => s + (+c.value || 0), 0);
+  const waiting = live.filter(c => c.type === 'follow').length;
+  $('#stats').innerHTML = `
+    <span class="${over ? 'bad' : ''}">Zapadlo <b>${over}</b></span>
+    <span>Danes <b>${todayN}</b></span>
+    <span>Čakam na <b>${waiting}</b></span>
+    <span>Priložnosti <b>${opps.length}</b> · <b>${eur(sum)}</b></span>`;
+}
+
+function renderClients() {
+  const list = clients();
+  $('#clientList').innerHTML = list.map(c => `<option value="${esc(c)}">`).join('');
+  const sel = $('#clientFilter');
+  const cur = filters.client;
+  sel.innerHTML = '<option value="">Vse stranke</option>' + list.map(c => `<option${norm(c) === norm(cur) ? ' selected' : ''}>${esc(c)}</option>`).join('');
+}
+
+/* ---------- Povleci in spusti ---------- */
+let dragId = null;
+const ph = document.createElement('div');
+ph.className = 'placeholder';
+
+function dropIndex(listEl, y) {
+  const cards = [...listEl.querySelectorAll('.card:not(.dragging)')];
+  for (let i = 0; i < cards.length; i++) {
+    const r = cards[i].getBoundingClientRect();
+    if (y < r.top + r.height / 2) return { i, before: cards[i] };
+  }
+  return { i: cards.length, before: null };
+}
+
+document.addEventListener('dragstart', e => {
+  const card = e.target.closest?.('.card');
+  if (!card) return;
+  dragId = card.dataset.id;
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragId);
+});
+document.addEventListener('dragend', e => {
+  e.target.closest?.('.card')?.classList.remove('dragging');
+  ph.remove();
+  document.querySelectorAll('.drop-target').forEach(x => x.classList.remove('drop-target'));
+  dragId = null;
+});
+document.addEventListener('dragover', e => {
+  const list = e.target.closest?.('.col-list') || e.target.closest?.('.col')?.querySelector('.col-list');
+  if (!list || !dragId) return;
+  e.preventDefault();
+  document.querySelectorAll('.drop-target').forEach(x => x.classList.remove('drop-target'));
+  list.closest('.col').classList.add('drop-target');
+  list.querySelector('.empty')?.remove();
+  const { before } = dropIndex(list, e.clientY);
+  if (before) list.insertBefore(ph, before); else list.appendChild(ph);
+});
+document.addEventListener('drop', e => {
+  const list = e.target.closest?.('.col-list') || e.target.closest?.('.col')?.querySelector('.col-list');
+  if (!list || !dragId) return;
+  e.preventDefault();
+  const c = state.cards.find(x => x.id === dragId);
+  const colId = list.dataset.col;
+  const ids = [...list.children].filter(el => el === ph || (el.classList.contains('card') && el.dataset.id !== dragId)).map(el => el === ph ? dragId : el.dataset.id);
+  moveTo(c, colId);
+  ids.forEach((id, i) => { const x = state.cards.find(k => k.id === id); if (x) x.order = i; });
+  ph.remove();
+  touch(c);
+});
+
+function moveTo(c, colId) {
+  if (c.col !== 'done' && colId === 'done') c.doneAt = Date.now();
+  if (colId !== 'done') delete c.doneAt;
+  c.col = colId;
+}
+
+/* ---------- Predal (podrobnosti kartice) ---------- */
+const dColSel = $('#dCol');
+dColSel.innerHTML = COLS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+$('#dStage').innerHTML = STAGES.map(s => `<option>${s}</option>`).join('');
+
+function openCard(id) {
+  const c = state.cards.find(x => x.id === id);
+  if (!c) return;
+  openId = id;
+  $('#drawerWrap').classList.remove('hidden');
+  fillDrawer(c);
+  setTimeout(() => (c.title ? $('#dNext') : $('#dTitle')).focus(), 0);
+}
+function closeDrawer() { openId = null; $('#drawerWrap').classList.add('hidden'); }
+
+function fillDrawer(c) {
+  $('#dTitle').value = c.title;
+  document.querySelectorAll('#dType .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.type === c.type));
+  dColSel.value = c.col;
+  $('#dClient').value = c.client || '';
+  $('#dDue').value = c.due || '';
+  $('#dPrio').value = c.prio || 0;
+  $('#dStage').value = c.stage || 'Lead';
+  $('#dValue').value = c.value ?? '';
+  $('#dNext').value = c.next || '';
+  $('#dPath').value = c.path || '';
+  $('#dNotes').value = c.notes || '';
+  $('#oppFields').classList.toggle('hidden', c.type !== 'opp');
+  $('#dDone').textContent = c.col === 'done' ? '↺ Ponovno odpri' : '✓ Narejeno';
+  $('#dArchive').textContent = c.archived ? 'Obnovi iz arhiva' : 'Arhiviraj';
+  renderSubtasks(c); renderLog(c);
+  $('#dMeta').textContent = `Ustvarjeno ${fmtTs(c.created)} · spremenjeno ${fmtTs(c.updated)}`;
+}
+
+function renderSubtasks(c) {
+  $('#dSubtasks').innerHTML = c.subtasks.map(s => `<li class="${s.done ? 'done' : ''}" data-sid="${s.id}">
+    <input type="checkbox" ${s.done ? 'checked' : ''} aria-label="Opravljeno"><span>${esc(s.text)}</span>
+    <button class="icon-btn" data-action="delSub" aria-label="Odstrani">✕</button></li>`).join('');
+}
+function renderLog(c) {
+  $('#dLog').innerHTML = c.log.map(l => `<li data-lid="${l.id}"><span class="when">${fmtTs(l.ts)}</span><span class="txt">${esc(l.text)}</span>
+    <button class="icon-btn" data-action="delLog" aria-label="Odstrani zapis">✕</button></li>`).join('') || '<li class="saveinfo">Še ni zapisov.</li>';
+}
+
+const cur = () => state.cards.find(x => x.id === openId);
+const bind = (sel, key, conv = v => v) => $(sel).addEventListener('input', e => {
+  const c = cur(); if (!c) return;
+  c[key] = conv(e.target.value);
+  touch(c);
+});
+bind('#dTitle', 'title');
+bind('#dClient', 'client', v => v.trim() ? v : undefined);
+bind('#dDue', 'due', v => v || undefined);
+bind('#dPrio', 'prio', v => +v);
+bind('#dStage', 'stage');
+bind('#dValue', 'value', v => v === '' ? undefined : +v);
+bind('#dNext', 'next');
+bind('#dPath', 'path');
+bind('#dNotes', 'notes');
+dColSel.addEventListener('change', e => { const c = cur(); moveTo(c, e.target.value); c.order = -Date.now(); touch(c); fillDrawer(c); });
+
+$('#dType').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); const c = cur(); if (!b || !c) return;
+  c.type = b.dataset.type;
+  if (c.type === 'opp' && !c.stage) c.stage = 'Lead';
+  touch(c); fillDrawer(c);
+});
+$('#subForm').addEventListener('submit', e => {
+  e.preventDefault(); const c = cur(); const v = $('#subInput').value.trim(); if (!c || !v) return;
+  c.subtasks.push({ id: uid(), text: v, done: false }); $('#subInput').value = '';
+  touch(c); renderSubtasks(c);
+});
+$('#dSubtasks').addEventListener('change', e => {
+  const c = cur(); const li = e.target.closest('li'); const s = c?.subtasks.find(x => x.id === li?.dataset.sid); if (!s) return;
+  s.done = e.target.checked; touch(c); renderSubtasks(c);
+});
+$('#logForm').addEventListener('submit', e => {
+  e.preventDefault(); const c = cur(); const v = $('#logInput').value.trim(); if (!c || !v) return;
+  c.log.unshift({ id: uid(), ts: Date.now(), text: v }); $('#logInput').value = '';
+  touch(c); renderLog(c);
+});
+$('#copyPath').addEventListener('click', async () => {
+  const v = $('#dPath').value.trim(); if (!v) return;
+  try { await navigator.clipboard.writeText(v); toast('Pot kopirana. Prilepi jo v Raziskovalec (Win+E, Ctrl+L, Ctrl+V).'); }
+  catch { $('#dPath').select(); document.execCommand('copy'); toast('Pot kopirana.'); }
+});
+$('#dDone').addEventListener('click', () => {
+  const c = cur(); moveTo(c, c.col === 'done' ? 'todo' : 'done');
+  if (c.col === 'done' && c.type === 'follow') c.log.unshift({ id: uid(), ts: Date.now(), text: 'Urejeno' });
+  touch(c); fillDrawer(c);
+});
+$('#dPlus2').addEventListener('click', () => {
+  const c = cur(); const base = c.due && parseIso(c.due) > today() ? parseIso(c.due) : today();
+  c.due = isoDate(addDays(base, 2)); touch(c); fillDrawer(c);
+});
+$('#dArchive').addEventListener('click', () => {
+  const c = cur(); c.archived = !c.archived; touch(c);
+  if (c.archived) { closeDrawer(); toast('Arhivirano.', 'Razveljavi', () => { c.archived = false; touch(c); }); } else fillDrawer(c);
+});
+$('#dDelete').addEventListener('click', () => {
+  const c = cur(); if (!c) return;
+  state.cards = state.cards.filter(x => x !== c); lastDeleted = c;
+  save(); render(); closeDrawer();
+  toast('Kartica izbrisana.', 'Razveljavi', () => { state.cards.push(lastDeleted); save(); render(); });
+});
+
+/* ---------- Modali: meni, arhiv, pomoč ---------- */
+function openModal(html) { $('#modal').innerHTML = html; $('#modalWrap').classList.remove('hidden'); }
+function closeModal() { $('#modalWrap').classList.add('hidden'); }
+
+function showMenu() {
+  openModal(`<h2>Meni</h2><div class="menu">
+    ${fsSupported ? `<button class="btn" data-action="chooseBackup">💾 ${backupHandle ? 'Zamenjaj' : 'Nastavi'} datoteko za samodejno varnostno kopijo</button>` : '<p class="saveinfo">Samodejna kopija v datoteko deluje v Edge ali Chrome. Uporabljaj ročni izvoz.</p>'}
+    ${backupHandle ? '<button class="btn" data-action="restoreBackup">⟲ Naloži podatke iz varnostne kopije</button>' : ''}
+    <button class="btn" data-action="exportJson">⬇ Izvozi vse (JSON)</button>
+    <button class="btn" data-action="importJson">⬆ Uvozi iz JSON</button>
+    <button class="btn" data-action="exportCsv">⬇ Izvozi tabelo za Excel (CSV)</button>
+    <button class="btn" data-action="archive">🗄 Arhiv (${state.cards.filter(c => c.archived).length})</button>
+    <button class="btn" data-action="theme">◐ Tema: ${({ light: 'svetla', dark: 'temna' })[document.documentElement.dataset.theme] || 'sistemska'}</button>
+    <button class="btn" data-action="help">? Pomoč in bližnjice</button>
+  </div>`);
+}
+
+function showArchive() {
+  const list = state.cards.filter(c => c.archived).sort((a, b) => b.updated - a.updated);
+  openModal(`<h2>Arhiv</h2>${list.length ? `<table><tr><th>Naslov</th><th>Stranka</th><th>Spremenjeno</th><th></th></tr>
+    ${list.map(c => `<tr data-id="${c.id}"><td><a href="#" data-action="openArchived">${esc(c.title)}</a> <span class="badge ${c.type}">${TYPES[c.type]}</span></td><td>${esc(c.client)}</td><td>${fmtTs(c.updated)}</td>
+    <td><button class="btn small" data-action="unarchive">Obnovi</button></td></tr>`).join('')}</table>` : '<p class="saveinfo">Arhiv je prazen.</p>'}
+    <p><button class="btn" data-close="modal">Zapri</button></p>`);
+}
+
+function showHelp() {
+  openModal(`<h2>Pomoč</h2>
+  <p><b>Hiter vnos</b> (zgoraj): napiši naslov in dodaj oznake v poljubnem vrstnem redu.</p>
+  <table>
+    <tr><td><code>jutri</code> <code>danes</code> <code>pojutrišnjem</code></td><td>rok</td></tr>
+    <tr><td><code>pon</code> … <code>ned</code>, <code>petek</code></td><td>rok: naslednji ta dan v tednu</td></tr>
+    <tr><td><code>3d</code> <code>2t</code> <code>15.10.</code></td><td>rok čez 3 dni, 2 tedna, na datum</td></tr>
+    <tr><td><code>!1</code> <code>!2</code> <code>!3</code></td><td>prioriteta (1 = visoka)</td></tr>
+    <tr><td><code>#p</code></td><td>priložnost</td></tr>
+    <tr><td><code>#s</code> ali <code>#čakam</code></td><td>sledenje: čakam na odgovor ali klic (gre v stolpec Čakam)</td></tr>
+    <tr><td><code>#v</code></td><td>takoj v stolpec V delu</td></tr>
+    <tr><td><code>@Novak</code> <code>@Novak_d.o.o.</code></td><td>stranka (podčrtaj = presledek). Znane stranke se prepoznajo tudi brez @.</td></tr>
+    <tr><td><code>5000€</code> <code>12k€</code></td><td>vrednost (kartica postane priložnost)</td></tr>
+  </table>
+  <p>Primeri: <code>Ponudba za ERP @Novak 15k€ pet !1</code> · <code>Odgovor na pogodbo @Kovač #s 3d</code></p>
+  <p><b>Tipke:</b> <code>N</code> hiter vnos · <code>/</code> iskanje · <code>Esc</code> zapri · <code>Enter</code> na kartici jo odpre.</p>
+  <p><b>Podatki</b> so shranjeni samo v tem brskalniku na tem računalniku. Nič se ne pošilja na strežnik. Nastavi samodejno varnostno kopijo v datoteko na svojem omrežnem disku (Meni), ker brisanje podatkov brskalnika izbriše tudi kartice.</p>
+  <p><button class="btn" data-close="modal">Zapri</button></p>`);
+}
+
+function cycleTheme() {
+  const order = ['', 'light', 'dark'];
+  const curT = document.documentElement.dataset.theme || '';
+  const next = order[(order.indexOf(curT) + 1) % order.length];
+  if (next) document.documentElement.dataset.theme = next; else delete document.documentElement.dataset.theme;
+  try { localStorage.setItem('delovni-pult.theme', next); } catch {}
+  showMenu();
+}
+try { const t = localStorage.getItem('delovni-pult.theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+
+/* ---------- Obvestila ---------- */
+let toastTimer;
+function toast(msg, actionLabel, action) {
+  document.querySelector('.toast')?.remove();
+  const el = document.createElement('div');
+  el.className = 'toast'; el.setAttribute('role', 'status');
+  el.innerHTML = `<span>${esc(msg)}</span>${actionLabel ? `<button>${esc(actionLabel)}</button>` : ''}`;
+  if (actionLabel) el.querySelector('button').onclick = () => { action(); el.remove(); };
+  document.body.appendChild(el);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 6000);
+}
+
+/* ---------- Dogodki ---------- */
+$('#quickForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('#quickInput').value.trim(); if (!v) return;
+  const c = addCard(parseQuick(v));
+  $('#quickInput').value = '';
+  const d = dueInfo(c.due);
+  toast(`Dodano: ${c.title || '(brez naslova)'}${c.client ? ' · ' + c.client : ''}${d ? ' · rok ' + d.label : ''}`, 'Odpri', () => openCard(c.id));
+});
+
+$('#search').addEventListener('input', e => { filters.q = e.target.value; render(); });
+$('#clientFilter').addEventListener('change', e => { filters.client = e.target.value; render(); });
+$('#dueOnly').addEventListener('change', e => { filters.dueOnly = e.target.checked; render(); });
+$('#typeChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  filters.type = b.dataset.type;
+  document.querySelectorAll('#typeChips .chip').forEach(x => x.setAttribute('aria-pressed', x === b));
+  render();
+});
+$('#menuBtn').addEventListener('click', showMenu);
+
+$('#board').addEventListener('click', e => {
+  if (e.target.closest('[data-action=archiveDone]')) {
+    const done = state.cards.filter(c => c.col === 'done' && !c.archived);
+    done.forEach(c => { c.archived = true; c.updated = Date.now(); });
+    save(); render();
+    toast(`Arhiviranih ${done.length} kartic.`, 'Razveljavi', () => { done.forEach(c => c.archived = false); save(); render(); });
+    return;
+  }
+  const card = e.target.closest('.card'); if (card) openCard(card.dataset.id);
+});
+$('#board').addEventListener('keydown', e => {
+  const card = e.target.closest('.card'); if (card && e.key === 'Enter') openCard(card.dataset.id);
+});
+
+document.addEventListener('click', e => {
+  const close = e.target.closest('[data-close]');
+  if (close) { close.dataset.close === 'drawer' ? closeDrawer() : closeModal(); return; }
+  if (e.target.id === 'setBackupLink') { e.preventDefault(); chooseBackup(); return; }
+  if (e.target.id === 'reconnectLink') { e.preventDefault(); reconnectBackup(); return; }
+  const a = e.target.closest('#modal [data-action]'); if (!a) return;
+  const id = a.closest('tr')?.dataset.id;
+  ({
+    chooseBackup, restoreBackup: restoreFromBackup, exportJson, exportCsv,
+    importJson: () => $('#importFile').click(),
+    archive: showArchive, help: showHelp, theme: cycleTheme,
+    unarchive: () => { const c = state.cards.find(x => x.id === id); c.archived = false; touch(c); showArchive(); },
+    openArchived: () => { e.preventDefault(); closeModal(); openCard(id); },
+  })[a.dataset.action]?.();
+});
+$('#dSubtasks').addEventListener('click', e => {
+  if (!e.target.closest('[data-action=delSub]')) return;
+  const c = cur(); const sid = e.target.closest('li').dataset.sid;
+  c.subtasks = c.subtasks.filter(s => s.id !== sid); touch(c); renderSubtasks(c);
+});
+$('#dLog').addEventListener('click', e => {
+  if (!e.target.closest('[data-action=delLog]')) return;
+  const c = cur(); const lid = e.target.closest('li').dataset.lid;
+  c.log = c.log.filter(l => l.id !== lid); touch(c); renderLog(c);
+});
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { importData(JSON.parse(await f.text())); } catch (err) { toast('Napaka pri branju: ' + err.message); }
+  e.target.value = '';
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('#modalWrap').classList.contains('hidden')) closeModal(); else if (openId) closeDrawer(); return; }
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
+  if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); $('#quickInput').focus(); }
+  if (e.key === '/') { e.preventDefault(); $('#search').focus(); }
+});
+
+// Druga odprta okna istega orodja: osveži, ko se podatki spremenijo drugje.
+window.addEventListener('storage', e => {
+  if (e.key !== STORE_KEY) return;
+  load(); render(); if (openId) { const c = cur(); c ? fillDrawer(c) : closeDrawer(); }
+});
+// Rok "danes" se premakne čez polnoč.
+setInterval(renderStats, 60 * 60 * 1000);
+
+/* ---------- Zagon ---------- */
+load();
+if (!state.cards.length && !localStorage.getItem(STORE_KEY + '.seen')) {
+  [
+    'Preberi pomoč (Meni → Pomoč) danes',
+    'Nastavi varnostno kopijo na omrežni disk (Meni) !1 danes',
+  ].forEach(t => addCard(parseQuick(t)));
+  try { localStorage.setItem(STORE_KEY + '.seen', '1'); } catch {}
+}
+render();
+initBackup();
+</script>
+</body>
+</html>
