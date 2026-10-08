@@ -50,10 +50,9 @@ Povratna informacija na plan v1 (8. 10. 2026, dobesedno):
 **Zaprto omrežje, brez skript in namestitev.** Edino, kar je na službenem PC skoraj zagotovo dovoljeno, je spletni brskalnik (Edge ali Chrome). Zato je orodje **spletna stran, ki teče v brskalniku**. Brskalnik danes zmore:
 
 - shranjevanje podatkov lokalno (IndexedDB),
-- snemanje mikrofona in zvoka zaslona/zavihka (Teams, 3CX klic),
 - poganjanje AI modelov lokalno (WebAssembly in WebGPU), brez strežnika.
 
-Brskalnik nalaga samo statične datoteke (HTML, JS, model). **Nobeni podatki, posnetki ali besedila ne zapustijo PC-ja.**
+Brskalnik nalaga samo statične datoteke (HTML, JS, model). **Nobeni podatki ali besedila ne zapustijo PC-ja.**
 
 **Kje teče kaj:**
 
@@ -61,7 +60,7 @@ Brskalnik nalaga samo statične datoteke (HTML, JS, model). **Nobeni podatki, po
 |-----|-----|
 | Uporabniški vmesnik, opravila, priložnosti, projekti | brskalnik na službenem PC |
 | Podatki | brskalnik (IndexedDB) + varnostna kopija JSON na omrežnem disku |
-| Transkripcija (Whisper) | brskalnik na službenem PC (WASM ali WebGPU) |
+| ~~Transkripcija (Whisper)~~ | v2: opuščeno |
 | AI povzetek (majhen LLM) | brskalnik na službenem PC (WebGPU), opcijsko |
 | cPanel | samo gostovanje statičnih datotek: aplikacija, knjižnica, datoteke modelov. Strežnik nikoli ne vidi vsebine. |
 
